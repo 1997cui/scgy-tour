@@ -15,20 +15,17 @@ try {
     $con->exec("set character set 'utf8'");//读库
     $con->exec("set names 'utf8'");//写库
 } catch (PDOException $e) {
-    print "Error: ". $e->getMessage(). "</br>";
+    print "Error: " . $e->getMessage() . "</br>";
 }
 
-if (isset($_POST["submit"]))
-{
+if (isset($_POST["submit"])) {
     print "<script>alert(\"1\");</script>>";
-    try
-    {
+    try {
         $query = $con->prepare("INSERT INTO reg (name, phone, email) VALUES (?,?,?)");
         $query->execute(array($_POST['name'], $_POST['phone'], $_POST['email']));
-        $_SESSION['id']=$con->lastInsertId();
-    }
-    catch (PDOException $e){
-        print "Error: ". $e->getMessage(). "</br>";
+        $_SESSION['id'] = $con->lastInsertId();
+    } catch (PDOException $e) {
+        print "Error: " . $e->getMessage() . "</br>";
         die();
     }
 }
@@ -54,26 +51,27 @@ if (isset($_POST["submit"]))
 </head>
 <body>
 <h1>少年班学院接待团参观报名</h1>
-    <div class="container">
-        <div class="row">
-            <form role="form" method="post">
-                <div class="form-group">
-        <label for="name">姓名</label>
-        <input type="text" class="form-control" placeholder="姓名" name="name" id="name"/>
-                    </div>
-                <div class="form-group">
-            <label for="phone">电话</label>
-        <input type="text" class="form-control" placeholder="电话" name="phone" id="phone"/>
-                    </div>
-                <div class="form-group">
-                    <label for="email">电子邮箱</label>
-                    <input type="text" class="form-control" placeholder="电子邮箱" name="email" id="email"/>
+
+<div class="container">
+    <div class="row">
+        <form role="form" method="post">
+            <div class="form-group">
+                <label for="name">姓名</label>
+                <input type="text" class="form-control" placeholder="姓名" name="name" id="name"/>
+            </div>
+            <div class="form-group">
+                <label for="phone">电话</label>
+                <input type="text" class="form-control" placeholder="电话" name="phone" id="phone"/>
+            </div>
+            <div class="form-group">
+                <label for="email">电子邮箱</label>
+                <input type="text" class="form-control" placeholder="电子邮箱" name="email" id="email"/>
                 <button type="submit" class="btn btn-success" name="submit" value="submit">立即报名!</button>
-                </form>
-        </div>
+        </form>
     </div>
+</div>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="//upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.3.min.js"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/bootstrap.min.js"></script>
 </body>
