@@ -1,78 +1,69 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: 天一standard
- * Date: 2015/10/24
- * Time: 21:53
- */
+header("application/json");
+
 try {
     session_start();
     $con = new PDO('mysql:host=127.0.0.1;dbname=tour;charset=utf8', 'root', '');
-    //if (!$con) {
-    //   echo "could not connect to mysql!";
-    //  exit;
-    //}
-    $con->exec("set character set 'utf8'");//读库
-    $con->exec("set names 'utf8'");//写库
+    $con->exec("set character set 'utf8'");
+    $con->exec("set names 'utf8'");
 } catch (PDOException $e) {
-    print "Error: " . $e->getMessage() . "</br>";
+        echo json_encode(['status' => 1, 'text' => '数据库存入失败：' . $e->getMessage()]);
 }
 
-if (isset($_POST["submit"])) {
-    print "<script>alert(\"1\");</script>>";
+if (isset($_POST["register"])) {
+    /*if (isset($_SESSION['id']))
+    {
+        echo json_encode(['status' => 1, 'text' => '您已成功注册过！']);
+        exit;
+    }*/
+
+    // Judging the availability of the posted data.
+    if (!isset($_POST['num']) || intval($_POST['num']) < 1)
+    {
+        echo json_encode(['status' => 1, 'text' => '人数输入错误，至少需1人报名。']);
+        exit;
+    }
+    if (!isset($_POST['name']) || strlen($_POST['name']) > 20 || strlen($_POST['name']) == 0)
+    {
+        echo json_encode(['status' => 1, 'text' => '联系人姓名输入错误，可能是长度过长或未输入。']);
+        exit;
+    }
+
+    if (!isset($_POST['route']) || !($_POST['route'] == '1' || $_POST['route'] == '2'))
+    {
+        echo json_encode(['status' => 1, 'text' => '请输入正确的路线编号，1或2。']);
+        exit;
+    }
+    if (!isset($_POST['phone']) || strlen($_POST['phone']) != 11)
+    {
+        echo json_encode(['status' => 1, 'text' => '移动电话号码输入错误，请输入正确的11位数字联系电话。']);
+        exit;
+    }
+    if (!isset($_POST['email']) || strlen($_POST['email']) > 30 || strlen($_POST['email']) <= 2)
+    {
+        echo json_encode(['status' => 1, 'text' => '电子邮箱地址输入错误，可能是长度过长或未输入。']);
+        exit;
+    }
+
+    // Saving the data to MySql.
     try {
-        $query = $con->prepare("INSERT INTO reg (name, phone, email) VALUES (?,?,?)");
-        $query->execute(array($_POST['name'], $_POST['phone'], $_POST['email']));
-        $_SESSION['id'] = $con->lastInsertId();
+        $query = $con->prepare("INSERT INTO reg (num, name, route, phone, email) VALUES (?,?,?,?,?)");
+        $query->execute([intval($_POST['num']), $_POST['name'], $_POST['route'], $_POST['phone'], $_POST['email']]);
     } catch (PDOException $e) {
-        print "Error: " . $e->getMessage() . "</br>";
-        die();
+        echo json_encode(['status' => 1, 'text' => '数据库存入失败：' . $e->getMessage()]);
+        exit;
+    }
+    echo json_encode(['status' => 0, 'text' => '注册成功！']);
+    $_SESSION['id'] = $con->lastInsertId();
+}
+
+if (isset($_POST["feedback"])) {
+    try {
+        $query = $con->prepare("INSERT INTO fdbk (postscript) VALUES (?)");
+        $query->execute([$_POST['postscript']]);
+    } catch (PDOException $e) {
+        echo json_encode(['status' => 1, 'text' => '数据库存入失败：' . $e->getMessage()]);
+        exit;
     }
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>少年班学院接待团参观报名</title>
-
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-</head>
-<body>
-<h1>少年班学院接待团参观报名</h1>
-
-<div class="container">
-    <div class="row">
-        <form role="form" method="post">
-            <div class="form-group">
-                <label for="name">姓名</label>
-                <input type="text" class="form-control" placeholder="姓名" name="name" id="name"/>
-            </div>
-            <div class="form-group">
-                <label for="phone">电话</label>
-                <input type="text" class="form-control" placeholder="电话" name="phone" id="phone"/>
-            </div>
-            <div class="form-group">
-                <label for="email">电子邮箱</label>
-                <input type="text" class="form-control" placeholder="电子邮箱" name="email" id="email"/>
-                <button type="submit" class="btn btn-success" name="submit" value="submit">立即报名!</button>
-        </form>
-    </div>
-</div>
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="//upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.3.min.js"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="js/bootstrap.min.js"></script>
-</body>
-</html>
